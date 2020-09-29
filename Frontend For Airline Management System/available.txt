@@ -1,0 +1,17 @@
+    @RequestMapping(value = "/flights/availableFlights", method = RequestMethod.GET)
+    public String availableFlights(Model model, @RequestParam String takeOffPoint, @RequestParam String destinationPoint, @RequestParam String departure) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date departDate = formatter.parse(departure);
+        model.addAttribute("available_flights", flightRepository.searchAvailableFlights(takeOffPoint, destinationPoint, departDate));
+        return "flight/availableFlights";
+    }
+
+
+
+
+public interface FlightRepository extends CrudRepository<Flight, Integer> {
+    Flight findFlightByFlightNumber(String flightNumber);
+
+    @Query(value = "SELECT * FROM flight f WHERE f.take_off_point = :takeOffPoint and f.destination_point = :destinationPoint and date(f.take_off_time) = date(:takeOffTime) and f.available_seats > 0", nativeQuery = true)
+    List<Flight> searchAvailableFlights(String takeOffPoint, String destinationPoint, Date takeOffTime);
+}
